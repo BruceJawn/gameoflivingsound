@@ -3,6 +3,7 @@
 	import com.bit101.components.PushButton;
 	import com.mewdriller.control.Controller;
 	import com.mewdriller.view.SoundSquare;
+	import com.mewdriller.sound.Tone;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
@@ -21,6 +22,8 @@
 		
 		private var _controller:Controller = Controller.getInstance();
 		private var _beat:Timer = new Timer(msPerSquare);
+		private var isOn:Vector.<Boolean> = new Vector.<Boolean>();
+		private var soundBoard:Vector.<Vector.<SoundSquare>>;
 		
 		/**
 		 * Number of ms between beats.
@@ -50,7 +53,33 @@
 		private function onBeatTick(e:TimerEvent):void 
 		{
 			// Play the appropriate column of tones.
-			_controller.playColumn((_beat.currentCount - 1) % 16);
+			var col:Number = ((_beat.currentCount - 1) % 16);
+		
+			
+			
+			
+				
+				isOn.unshift(soundBoard[0][col].isOn);
+				isOn.unshift(soundBoard[1][col].isOn);
+				isOn.unshift(soundBoard[2][col].isOn);
+				isOn.unshift(soundBoard[3][col].isOn);
+				isOn.unshift(soundBoard[4][col].isOn);
+				isOn.unshift(soundBoard[5][col].isOn);
+				isOn.unshift(soundBoard[6][col].isOn);
+				isOn.unshift(soundBoard[7][col].isOn);
+				isOn.unshift(soundBoard[8][col].isOn);
+				isOn.unshift(soundBoard[9][col].isOn);
+				isOn.unshift(soundBoard[10][col].isOn);
+				isOn.unshift(soundBoard[11][col].isOn);
+				isOn.unshift(soundBoard[12][col].isOn);
+				isOn.unshift(soundBoard[13][col].isOn);
+				isOn.unshift(soundBoard[14][col].isOn);
+				isOn.unshift(soundBoard[15][col].isOn);
+				
+				
+			//trace(isOn[0], isOn[1], isOn[2], isOn[3]);
+			new Tone(2, 8, 3, 5, 2, 5, isOn).start();
+			_controller.playColumn(col);
 		}
 		
 		private function addButtons():void 
@@ -79,15 +108,18 @@
 		
 		private function drawSquares():void 
 		{
-			var square:SoundSquare, i:int, ii:int;
+			var square:SoundSquare, row:int, col:int;
+			soundBoard = new Vector.<Vector.<SoundSquare>>( 16, true );
 			
-			for (i = 0; i < BOARD_SIZE; i++) 
+			for (row = 0; row < BOARD_SIZE; row++) 
 			{
-				for (ii = 0; ii < BOARD_SIZE; ii++) 
+				soundBoard[row] = new Vector.<SoundSquare>(16, true);
+				for (col = 0; col < BOARD_SIZE; col++) 
 				{
-					square = new SoundSquare(i, ii);					
-					square.x = SoundSquare.SIZE * ii;
-					square.y = SoundSquare.SIZE * i + SoundSquare.SIZE + 10;
+					square = new SoundSquare(row, col);					
+					square.x = SoundSquare.SIZE * col;
+					square.y = SoundSquare.SIZE * row + SoundSquare.SIZE + 10;
+					soundBoard[row][col] = square;
 					addChild(square);
 				}
 			}

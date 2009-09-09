@@ -48,6 +48,14 @@
 		
 		public function get isOn():Boolean { return _isOn; }
 		
+		public function On():Boolean
+		{
+			if (_isOn) return true;
+			else if (!_isOn) return false;
+			
+			return false;
+		}
+		
 		public function set isOn(value:Boolean):void 
 		{
 			_isOn = value;
@@ -128,10 +136,11 @@
 			{
 				turnActive();
 				
+				
 				// TODO: Composite all the tones into one sound so that the frame plays through correctly.
 				// Reference StandingWave's example to see if they're during this.
 				
-				new AudioPlayer(8192).play(_toneMgr.getToneByRow(row));
+				//new AudioPlayer(8192).play(_toneMgr.getToneByRow(row));
 			}
 		}
 		
