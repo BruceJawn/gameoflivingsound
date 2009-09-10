@@ -2,6 +2,7 @@
 {
 	import com.noteflight.standingwave2.elements.AudioDescriptor;
 	import com.noteflight.standingwave2.elements.IAudioSource;
+	import com.noteflight.standingwave2.filters.EchoFilter;
 	import com.noteflight.standingwave2.filters.EnvelopeFilter;
 	import com.noteflight.standingwave2.sources.SineSource;
 	import com.noteflight.standingwave2.utils.AudioUtils;
@@ -52,32 +53,34 @@
 			// TODO: Generate all chords.
 		}
 		
-		public function hasChord(column:Vector.<Boolean>):Boolean 
+		public function hasChord(key:String):Boolean 
 		{
-			return chords[makeKey(column)] != null;
-		}
-		
-		public function storeChord(chord:Vector.<ByteArray>, column:Vector.<Boolean>):void 
-		{
-			chords[makeKey(column)] = chord;
-		}
-		
-		public function getChord(column:Vector.<Boolean>):Vector.<ByteArray> 
-		{
-			var key:Number = makeKey(column);
+			var hit:Boolean = chords[key] != null;
 			
-			if (key != 0) trace("key: " + key);
+			return hit;
+		}
+		
+		public function storeChord(chord:Vector.<ByteArray>, key:String):void 
+		{
+			trace("storing @ " + key);
+			
+			chords[key] = chord;
+		}
+		
+		public function getChord(key:String):Vector.<ByteArray> 
+		{
+			var chord:Vector.<ByteArray> = chords[key];
 			
 			return chords[key];
 		}
 		
-		private function makeKey(column:Vector.<Boolean>):Number 
+		public function makeKey(column:Vector.<Boolean>):String 
 		{
-			var key:Number = 0;
+			var key:String = "";
 			
 			for (var i:int = 0; i < column.length; i++) 
 			{
-				if (column[i]) key += Math.pow(2, i);
+				key = ((column[i]) ? "1" : "0") + key;
 			}
 			
 			return key;

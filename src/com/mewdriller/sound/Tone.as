@@ -184,7 +184,7 @@
 		
 		private var _chord:Vector.<ByteArray> = new Vector.<ByteArray>();
 		private var _index:int;
-		
+		private var _key:String;
 		
 		public function start():void
 		{
@@ -192,45 +192,48 @@
 			
 			_index = 0;
 			
-			if (_toneMgr.hasChord(isOn)) _chord = _toneMgr.getChord(isOn);
+			_key = _toneMgr.makeKey(isOn);
+			
+			if (_toneMgr.hasChord(_key)) _chord = _toneMgr.getChord(_key);
 			
 			sound = new Sound();
 			sound.addEventListener(SampleDataEvent.SAMPLE_DATA, soundSampleDataHandler);
 			channel = sound.play();
 		}
 		
+		private var _shouldBePlaying:Boolean = true;
+		
 		public function stop():void
 		{
+			_shouldBePlaying = false;
+			
+			//channel.stop();
 			sound.removeEventListener(SampleDataEvent.SAMPLE_DATA, soundSampleDataHandler);
 			dispatchEvent(new Event(Event.COMPLETE));
 			
-			if (!_toneMgr.hasChord(isOn)) _toneMgr.storeChord(_chord, isOn);
+			if (!_toneMgr.hasChord(_key)) 
+			{
+				_toneMgr.storeChord(_chord, _key);
+			}
 		}
 		
 		private function buildChord():void
 		{
-			// TODO: Replace isOn with binary key to avoid conversion at each step.
-			
 			for (var i:Number = 0; i < 16; i++) step.push((isOn[i]) ? toner[i] : 0);
 		}
 		
 		private function soundSampleDataHandler(event:SampleDataEvent):void
 		{
-			if (_chord.length <= _index)
-			{
-				_chord[_index] = computeByteArray();
-			}
+			if (!_toneMgr.hasChord(_key)) _chord[_index] = computeByteArray();
 			
-			event.data.writeBytes(_chord[_index]);
-			
-			_index++;
+			if (_index < _chord.length) event.data.writeBytes(_chord[_index++]);
 		}
 		
 		private function computeByteArray():ByteArray 
 		{
 			var bytes:ByteArray = new ByteArray();
 			
-			for (var i:int = 0; i < BUFFER_SIZE; ++i)
+			for (var i:int = 0; i < BUFFER_SIZE && _shouldBePlaying; ++i)
 			{
 				phase += step[0] / SAMPLING_RATE;
 				phase2 += step[1] / SAMPLING_RATE;
@@ -248,7 +251,7 @@
 				phase14 += step[13] / SAMPLING_RATE;
 				phase15 += step[14] / SAMPLING_RATE;
 				phase16 += step[15] / SAMPLING_RATE;
-					
+				
 				var phaseAngle:Number = phase * Math.PI * 2;
 				var phaseAngle2:Number = phase2 * Math.PI * 2;
 				var phaseAngle3:Number = phase3 * Math.PI * 2;
