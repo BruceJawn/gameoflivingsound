@@ -8,7 +8,9 @@
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
+	import flash.utils.Dictionary;
 	import flash.utils.Timer;
+	import net.hires.debug.Stats;
 	
 	/**
 	 * 
@@ -23,7 +25,8 @@
 		private var _controller:Controller = Controller.getInstance();
 		private var _beat:Timer = new Timer(msPerSquare);
 		private var isOn:Vector.<Boolean> = new Vector.<Boolean>();
-		private var soundBoard:Vector.<Vector.<SoundSquare>>;
+		private var soundBoard:Vector.<Vector.<SoundSquare>>;		
+		private var chords:Dictionary = new Dictionary();
 		
 		/**
 		 * Number of ms between beats.
@@ -54,32 +57,32 @@
 		{
 			// Play the appropriate column of tones.
 			var col:Number = ((_beat.currentCount - 1) % 16);
-		
 			
+			var i:int, on:Boolean, hasNote:Boolean = false;
 			
+			for (i = 0; i < 16; i++) 
+			{
+				on = soundBoard[i][col].isOn
+				
+				isOn.unshift(on);
+				
+				// If the column actually has a note, remember that.
+				if (!hasNote && on) hasNote = true;
+			}
 			
-				
-				isOn.unshift(soundBoard[0][col].isOn);
-				isOn.unshift(soundBoard[1][col].isOn);
-				isOn.unshift(soundBoard[2][col].isOn);
-				isOn.unshift(soundBoard[3][col].isOn);
-				isOn.unshift(soundBoard[4][col].isOn);
-				isOn.unshift(soundBoard[5][col].isOn);
-				isOn.unshift(soundBoard[6][col].isOn);
-				isOn.unshift(soundBoard[7][col].isOn);
-				isOn.unshift(soundBoard[8][col].isOn);
-				isOn.unshift(soundBoard[9][col].isOn);
-				isOn.unshift(soundBoard[10][col].isOn);
-				isOn.unshift(soundBoard[11][col].isOn);
-				isOn.unshift(soundBoard[12][col].isOn);
-				isOn.unshift(soundBoard[13][col].isOn);
-				isOn.unshift(soundBoard[14][col].isOn);
-				isOn.unshift(soundBoard[15][col].isOn);
-				
-				
-			//trace(isOn[0], isOn[1], isOn[2], isOn[3]);
-			new Tone(2, 8, 3, 5, 2, 5, isOn).start();
+			// If the column has a note, play it:
+			
+			if (hasNote) 
+			{
+				new Tone(2, 8, 3, 5, 2, 5, isOn).start();
+			}
+			
 			_controller.playColumn(col);
+		}
+		
+		private function squareIsOn(item:Boolean, index:int, array:Vector.<Boolean>):Boolean 
+		{
+			return item;
 		}
 		
 		private function addButtons():void 
@@ -123,6 +126,13 @@
 					addChild(square);
 				}
 			}
+			
+			// Add the stats monitor to the stage.
+			
+			var stats:Stats = new Stats();
+			stats.x = SoundSquare.SIZE * BOARD_SIZE + SoundSquare.SIZE;
+			stats.y = 0;
+			addChild(stats);
 		}
 	}
 }

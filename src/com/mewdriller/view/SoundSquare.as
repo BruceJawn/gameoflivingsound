@@ -135,12 +135,6 @@
 			if (e.col != null && e.col == col) 
 			{
 				turnActive();
-				
-				
-				// TODO: Composite all the tones into one sound so that the frame plays through correctly.
-				// Reference StandingWave's example to see if they're during this.
-				
-				//new AudioPlayer(8192).play(_toneMgr.getToneByRow(row));
 			}
 		}
 		

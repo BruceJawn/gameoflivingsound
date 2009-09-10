@@ -5,13 +5,13 @@
   <target-player>10.0.0</target-player>
   <compiler>
     <source-path append="true">
-      <path-element>C:\Documents and Settings\ZBrown\Desktop\Projects\gameoflivingsound\src</path-element>
-      <path-element>C:\Documents and Settings\ZBrown\Desktop\Projects\gameoflivingsound\lib</path-element>
+      <path-element>C:\Documents and Settings\Drew Miller\Desktop\Projects\Personal\Audio\Game of Living Sound\Development\src</path-element>
+      <path-element>C:\Documents and Settings\Drew Miller\Desktop\Projects\Personal\Audio\Game of Living Sound\Development\lib</path-element>
       <path-element>C:\Program Files\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
   </compiler>
   <file-specs>
-    <path-element>C:\Documents and Settings\ZBrown\Desktop\Projects\gameoflivingsound\src\com\mewdriller\GameOfLivingSound.as</path-element>
+    <path-element>C:\Documents and Settings\Drew Miller\Desktop\Projects\Personal\Audio\Game of Living Sound\Development\src\com\mewdriller\GameOfLivingSound.as</path-element>
   </file-specs>
   <default-background-color>#000000</default-background-color>
   <default-frame-rate>255</default-frame-rate>
