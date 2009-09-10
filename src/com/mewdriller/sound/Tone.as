@@ -4,6 +4,7 @@
 	import flash.events.EventDispatcher;
 	import flash.events.SampleDataEvent;
 	import flash.media.Sound;
+	import flash.media.SoundChannel;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
 
@@ -12,6 +13,10 @@
 		public static const SAMPLING_RATE:Number = 44100;
 		public static const BUFFER_SIZE:int = 8192;		
 		public static const UNIT:int = 10;
+		
+		public static const ATTACK_PHASE:int = 1;
+		public static const DECAY_PHASE:int = 2;
+		public static const RELEASE_PHASE:int = 3;
 		
 		private var _toneMgr:ToneManager = ToneManager.getInstance();
 		
@@ -30,6 +35,7 @@
 		}
 		
 		private var sound:Sound;
+		private var channel:SoundChannel;
 		
 		private var phase:Number = 0;
 		private var phase2:Number = 0;
@@ -67,7 +73,7 @@
 		
 		private var amplify:Number = 0;
 		
-		private var state:int = 1; // 1: Attack, 2: Decay, 3: Release
+		private var tonePhase:int = 1; // 1: Attack, 2: Decay, 3: Release
 		
 		private var frequency:Number;
 		private var length:Number;
@@ -115,95 +121,105 @@
 		
 		private function updateAmplify():void
 		{
-			if (state == 1)
+			switch (tonePhase) 
 			{
-				amplify += v1;
-
-				if (amplify >= volume)
+				case ATTACK_PHASE:
+					processAttackPhase();
+				break;
+				
+				case DECAY_PHASE:
+					processDecayPhase();
+				break;
+				
+				case RELEASE_PHASE:
+					processReleasePhase();
+				break;
+			}
+		}
+		
+		private function processAttackPhase():void 
+		{
+			amplify += v1;
+			
+			if (amplify >= volume)
+			{
+				amplify = volume;
+				tonePhase = DECAY_PHASE;
+			}
+		}
+		
+		private function processDecayPhase():void 
+		{
+			amplify -= v2;
+			
+			if (volume < sustain)
+			{
+				if (amplify >= sustain)
 				{
-					amplify = volume;
-					state = 2;
+					amplify = sustain;
+					tonePhase = RELEASE_PHASE;
 				}
 			}
-			else if (state == 2)
+			else
 			{
-				amplify -= v2;
-				
-				if (volume < sustain)
+				if (amplify <= sustain)
 				{
-					if (amplify >= sustain)
-					{
-						amplify = sustain;
-						state = 3;
-					}
-				}
-				else
-				{
-					if (amplify <= sustain)
-					{
-						amplify = sustain;
-						state = 3;
-					}
-				}	
-			}
-			else if (state == 3)
-			{
-				amplify -= v3;
-				
-				if (amplify <= 0)
-				{
-					amplify = 0;
-					
-					stop();
+					amplify = sustain;
+					tonePhase = RELEASE_PHASE;
 				}
 			}
 		}
+		
+		private function processReleasePhase():void 
+		{
+			amplify -= v3;
+			
+			if (amplify <= 0)
+			{
+				amplify = 0;
+				
+				stop();
+			}
+		}
+		
+		private var _bytes:ByteArray;
 		
 		public function start():void
 		{
-			buildChord();				
+			_bytes = new ByteArray();
+			
+			buildChord();
+			
 			sound = new Sound();
 			sound.addEventListener(SampleDataEvent.SAMPLE_DATA, soundSampleDataHandler);
-			sound.play();
-		}
-		
-		private function buildChord():void
-		{
-			for (var i:Number = 0; i < 16; i++)
-			{
-				if (isOn[i])
-				{
-					step.push(toner[i]);
-					
-				}
-				else step.push(0);
-				
-			}
+			channel = sound.play();
 		}
 		
 		public function stop():void
 		{
 			sound.removeEventListener(SampleDataEvent.SAMPLE_DATA, soundSampleDataHandler);
 			dispatchEvent(new Event(Event.COMPLETE));
+			
+			_toneMgr.storeChord(_bytes, isOn);
+		}
+		
+		private function buildChord():void
+		{
+			for (var i:Number = 0; i < 16; i++) step.push((isOn[i]) ? toner[i] : 0);
 		}
 		
 		private function soundSampleDataHandler(event:SampleDataEvent):void
 		{
-			var bytes:ByteArray;
-			
 			if (_toneMgr.hasChord(isOn)) 
 			{
-				bytes = _toneMgr.getChord(isOn);
+				_bytes = _toneMgr.getChord(isOn);
 			}
 			else 
 			{
-				bytes = computeByteArray();
-				_toneMgr.storeChord(bytes, isOn);
+				_bytes.writeBytes(computeByteArray(), _bytes.length);
 			}
 			
-			event.data.writeBytes(bytes);
-			
-			stop();
+			event.data.writeBytes(computeByteArray());
 		}
 		
 		private function computeByteArray():ByteArray 
@@ -263,8 +279,8 @@
 				sample15 = Math.sin(phaseAngle15) * amplify / UNIT;
 				sample16 = Math.sin(phaseAngle16) * amplify / UNIT;
 				
-				bytes.writeFloat(.2 * (sample + sample2 + sample3 + sample4+sample5+sample6+sample7+sample8+sample9+sample10+sample11+sample12+sample13+sample14+sample15+sample16)/2);
-				bytes.writeFloat(.2 * (sample + sample2 + sample3 + sample4+sample5+sample6+sample7+sample8+sample9+sample10+sample11+sample12+sample13+sample14+sample15+sample16)/2);
+				bytes.writeFloat(.2 * (sample + sample2 + sample3 + sample4 + sample5 + sample6 + sample7 + sample8 + sample9 + sample10 + sample11 + sample12 + sample13 + sample14 + sample15 + sample16) / 2);
+				bytes.writeFloat(.2 * (sample + sample2 + sample3 + sample4 + sample5 + sample6 + sample7 + sample8 + sample9 + sample10 + sample11 + sample12 + sample13 + sample14 + sample15 + sample16) / 2);
 				
 				updateAmplify();
 			}
