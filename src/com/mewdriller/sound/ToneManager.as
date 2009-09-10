@@ -49,7 +49,7 @@
 		 */
 		private function initialize():void 
 		{
-			
+			// TODO: Generate all chords.
 		}
 		
 		public function hasChord(column:Vector.<Boolean>):Boolean 
@@ -57,14 +57,18 @@
 			return chords[makeKey(column)] != null;
 		}
 		
-		public function storeChord(chord:ByteArray, column:Vector.<Boolean>):void 
+		public function storeChord(chord:Vector.<ByteArray>, column:Vector.<Boolean>):void 
 		{
 			chords[makeKey(column)] = chord;
 		}
 		
-		public function getChord(column:Vector.<Boolean>):ByteArray 
+		public function getChord(column:Vector.<Boolean>):Vector.<ByteArray> 
 		{
-			return chords[makeKey(column)];
+			var key:Number = makeKey(column);
+			
+			if (key != 0) trace("key: " + key);
+			
+			return chords[key];
 		}
 		
 		private function makeKey(column:Vector.<Boolean>):Number 

@@ -182,13 +182,17 @@
 			}
 		}
 		
-		private var _bytes:ByteArray;
+		private var _chord:Vector.<ByteArray> = new Vector.<ByteArray>();
+		private var _index:int;
+		
 		
 		public function start():void
 		{
-			_bytes = new ByteArray();
-			
 			buildChord();
+			
+			_index = 0;
+			
+			if (_toneMgr.hasChord(isOn)) _chord = _toneMgr.getChord(isOn);
 			
 			sound = new Sound();
 			sound.addEventListener(SampleDataEvent.SAMPLE_DATA, soundSampleDataHandler);
@@ -200,26 +204,26 @@
 			sound.removeEventListener(SampleDataEvent.SAMPLE_DATA, soundSampleDataHandler);
 			dispatchEvent(new Event(Event.COMPLETE));
 			
-			_toneMgr.storeChord(_bytes, isOn);
+			if (!_toneMgr.hasChord(isOn)) _toneMgr.storeChord(_chord, isOn);
 		}
 		
 		private function buildChord():void
 		{
+			// TODO: Replace isOn with binary key to avoid conversion at each step.
+			
 			for (var i:Number = 0; i < 16; i++) step.push((isOn[i]) ? toner[i] : 0);
 		}
 		
 		private function soundSampleDataHandler(event:SampleDataEvent):void
 		{
-			if (_toneMgr.hasChord(isOn)) 
+			if (_chord.length <= _index)
 			{
-				_bytes = _toneMgr.getChord(isOn);
-			}
-			else 
-			{
-				_bytes.writeBytes(computeByteArray(), _bytes.length);
+				_chord[_index] = computeByteArray();
 			}
 			
-			event.data.writeBytes(computeByteArray());
+			event.data.writeBytes(_chord[_index]);
+			
+			_index++;
 		}
 		
 		private function computeByteArray():ByteArray 
