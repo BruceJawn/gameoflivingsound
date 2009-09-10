@@ -5,32 +5,28 @@
 	import flash.events.SampleDataEvent;
 	import flash.media.Sound;
 	import flash.utils.ByteArray;
+	import flash.utils.Dictionary;
 
 	public class Tone extends EventDispatcher
 	{
 		public static const SAMPLING_RATE:Number = 44100;
-		public static const BUFFER_SIZE:int = 8192;
-		
+		public static const BUFFER_SIZE:int = 8192;		
 		public static const UNIT:int = 10;
 		
-		private var s_length:Number;
-		private var s_volume:Number;
-		private var s_attack:Number;
-		private var s_decay:Number;
-		private var s_sustain:Number;
-		private var s_release:Number;
+		private var _toneMgr:ToneManager = ToneManager.getInstance();
 		
 		public function Tone(length:Number, volume:Number, attack:Number, decay:Number, sustain:Number, release:Number, isOn:Vector.<Boolean>)
 		{	
-			s_length = length;
-			s_volume = volume;
-			s_attack = attack;
-			s_decay = decay;
-			s_sustain = sustain;
-			s_release = release;
+			this.length = length;
+			this.volume = volume;
+			this.attack = attack;
+			this.decay = decay;
+			this.sustain = sustain;
+			this.release = release;
 			this.isOn = isOn; 
 			
-			reset();
+			check();
+			initializeVelocity();
 		}
 		
 		private var sound:Sound;
@@ -165,8 +161,6 @@
 		
 		public function start():void
 		{
-			reset();
-			
 			buildChord();				
 			sound = new Sound();
 			sound.addEventListener(SampleDataEvent.SAMPLE_DATA, soundSampleDataHandler);
@@ -175,8 +169,6 @@
 		
 		private function buildChord():void
 		{
-			
-			
 			for (var i:Number = 0; i < 16; i++)
 			{
 				if (isOn[i])
@@ -189,23 +181,6 @@
 			}
 		}
 		
-		private function reset():void 
-		{
-			step = new Vector.<Number>;
-			phase = phase2 = phase3 = phase4 = phase5 = phase6 = phase7 = phase8 = phase9 = phase10 = phase11 = phase12 = phase13 = phase14 = phase15 = phase16 = 0;
-			sample = sample2 = sample3 = sample4 = sample5 = sample6 = sample7 = sample8 = sample9 = sample10 = sample11 = sample12 = sample13 = sample14 = sample15 = sample16 = 0;
-			
-			attack = s_attack;
-			decay = s_decay;
-			length = s_length;
-			release = s_release;
-			sustain = s_sustain;
-			volume = s_volume;
-			
-			check();
-			initializeVelocity();
-		}
-		
 		public function stop():void
 		{
 			sound.removeEventListener(SampleDataEvent.SAMPLE_DATA, soundSampleDataHandler);
@@ -213,7 +188,26 @@
 		}
 		
 		private function soundSampleDataHandler(event:SampleDataEvent):void
-		{	
+		{
+			var bytes:ByteArray;
+			
+			if (_toneMgr.hasChord(isOn)) 
+			{
+				bytes = _toneMgr.getChord(isOn);
+			}
+			else 
+			{
+				bytes = computeByteArray();
+				_toneMgr.storeChord(bytes, isOn);
+			}
+			
+			event.data.writeBytes(bytes);
+			
+			stop();
+		}
+		
+		private function computeByteArray():ByteArray 
+		{
 			var bytes:ByteArray = new ByteArray();
 			
 			for (var i:int = 0; i < BUFFER_SIZE; ++i)
@@ -275,7 +269,7 @@
 				updateAmplify();
 			}
 			
-			event.data.writeBytes(bytes);
+			return bytes;
 		}
 	}
 }

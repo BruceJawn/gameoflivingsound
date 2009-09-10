@@ -60,6 +60,9 @@
 			
 			var i:int, on:Boolean, hasNote:Boolean = false;
 			
+			// Clear out the vector.
+			isOn.splice(0, isOn.length);
+			
 			for (i = 0; i < 16; i++) 
 			{
 				on = soundBoard[i][col].isOn
