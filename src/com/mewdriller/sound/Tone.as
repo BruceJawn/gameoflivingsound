@@ -30,7 +30,6 @@
 			this.release = release;
 			this.isOn = isOn; 
 			
-			check();
 			initializeVelocity();
 		}
 		
@@ -61,27 +60,7 @@
 		private var v2:Number;
 		private var v3:Number;
 		
-		private function check():void
-		{
-			if (attack + decay + release != UNIT)
-			{
-				attack = 0;
-				decay = 5;
-				release = 5;
-			}
-				
-			if (volume > UNIT)
-				volume = UNIT;
-			
-			if (volume < 0)
-				volume = 0;
-				
-			if (sustain > UNIT)
-				sustain = UNIT;
-				
-			if (sustain < 0)
-				sustain = 0;
-		}
+	
 		
 		private function initializeVelocity():void
 		{			

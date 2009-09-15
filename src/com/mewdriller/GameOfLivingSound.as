@@ -77,7 +77,7 @@
 			
 			if (hasNote) 
 			{
-				new Tone(2, 8, 3, 5, 2, 5, isOn).start();
+				new Tone(2, 10, 0, 5, 2, 5, isOn).start();
 			}
 			
 			_controller.playColumn(col);
