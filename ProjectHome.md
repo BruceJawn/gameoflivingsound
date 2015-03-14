@@ -1,0 +1,1 @@
+Drawing inspiration from the Hobnox Audiotool and Conway's Game of Life, the Game of Living Sound takes user input (or presets) and creates a constantly evolving soundscape of harmonic tones.
